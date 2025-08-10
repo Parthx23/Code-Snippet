@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Code Snippet Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        pre code::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        pre code::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        pre code::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+            border-radius: 20px;
+            border: 3px solid #1f2937;
+        }
+        #loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #5b21b6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-3xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-white">AI Code Snippet Generator</h1>
+            <p class="text-gray-400 mt-2">Use recommended snippets or generate custom code with an expert AI.</p>
+        </header>
+
+        <main class="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl shadow-indigo-500/10 p-6 md:p-8">
+            <!-- Controls Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label for="language-select" class="block mb-2 text-sm font-medium text-gray-300">Language:</label>
+                    <select id="language-select" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5">
+                        <option value="javascript">JavaScript</option>
+                        <option value="python">Python</option>
+                        <option value="java">Java</option>
+                        <option value="c">C</option>
+                        <option value="cpp">C++</option>
+                        <option value="mysql">MySQL</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="snippet-select" class="block mb-2 text-sm font-medium text-gray-300">Snippet:</label>
+                    <select id="snippet-select" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5">
+                        <!-- Options will be populated by JavaScript -->
+                    </select>
+                </div>
+            </div>
+            
+            <!-- AI Generation Section -->
+            <div id="ai-section" class="hidden mb-6">
+                <div class="mb-4">
+                    <label for="custom-prompt" class="block mb-2 text-sm font-medium text-gray-300">Describe the code you want:</label>
+                    <input type="text" id="custom-prompt" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="e.g., a function to reverse a string">
+                </div>
+                 <button id="generate-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stars" viewBox="0 0 16 16">
+                        <path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937zM3.794 1.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387A1.734 1.734 0 0 0 4.593 5.35l-.387 1.162a.217.217 0 0 1-.412 0L3.407 5.35A1.734 1.734 0 0 0 2.31 4.253l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387A1.734 1.734 0 0 0 3.407 2.31l.387-1.162zM10.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.156 1.156 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.156 1.156 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732L10.863.1z"/>
+                    </svg>
+                    Generate with AI
+                </button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="relative">
+                 <div id="loader-container" class="hidden absolute inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center rounded-lg">
+                    <div id="loader"></div>
+                </div>
+                <button id="copy-btn" class="absolute top-3 right-3 bg-gray-700 hover:bg-gray-600 text-gray-300 font-medium py-1 px-3 rounded-lg text-sm transition-colors duration-200 flex items-center gap-2 z-10">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
+                        <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+                        <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+                    </svg>
+                    <span id="copy-text">Copy</span>
+                </button>
+                <pre class="bg-gray-900 rounded-lg p-4 min-h-[250px] max-h-[500px] overflow-auto border border-gray-700"><code id="code-output" class="language-javascript"></code></pre>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Element References ---
+            const languageSelect = document.getElementById('language-select');
+            const snippetSelect = document.getElementById('snippet-select');
+            const codeOutput = document.getElementById('code-output');
+            const copyBtn = document.getElementById('copy-btn');
+            const copyText = document.getElementById('copy-text');
+            const aiSection = document.getElementById('ai-section');
+            const customPromptInput = document.getElementById('custom-prompt');
+            const generateBtn = document.getElementById('generate-btn');
+            const loaderContainer = document.getElementById('loader-container');
+
+            // --- Code Snippet Data ---
+            const snippets = {
+                javascript: {
+                    'Hello World': `console.log('Hello, World!');`,
+                    'For Loop': `for (let i = 0; i < 5; i++) {\n  console.log(\`Iteration \${i}\`);\n}`,
+                    'If-Else Statement': `const x = 10;\n\nif (x > 5) {\n  console.log('x is greater than 5');\n} else {\n  console.log('x is not greater than 5');\n}`,
+                    'Function Definition': `function greet(name) {\n  return \`Hello, \${name}!\`;\n}\n\nconsole.log(greet('Alice'));`,
+                    'Async/Await Fetch': `async function fetchData(url) {\n  try {\n    const response = await fetch(url);\n    const data = await response.json();\n    console.log(data);\n  } catch (error) {\n    console.error('Error fetching data:', error);\n  }\n}\n\nfetchData('https://api.example.com/data');`
+                },
+                python: {
+                    'Hello World': `print("Hello, World!")`,
+                    'For Loop': `for i in range(5):\n    print(f"Iteration {i}")`,
+                    'If-Else Statement': `x = 10\n\nif x > 5:\n    print("x is greater than 5")\nelse:\n    print("x is not greater than 5")`,
+                    'Function Definition': `def greet(name):\n    return f"Hello, {name}!"\n\nprint(greet("Alice"))`,
+                    'List Comprehension': `squares = [x**2 for x in range(10)]\nprint(squares)`
+                },
+                java: {
+                    'Hello World': `public class HelloWorld {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}`,
+                    'For Loop': `for (int i = 0; i < 5; i++) {\n    System.out.println("Iteration " + i);\n}`,
+                    'If-Else Statement': `int x = 10;\n\nif (x > 5) {\n    System.out.println("x is greater than 5");\n} else {\n    System.out.println("x is not greater than 5");\n}`,
+                    'Method Definition': `public class Main {\n    public static String greet(String name) {\n        return "Hello, " + name + "!";\n    }\n\n    public static void main(String[] args) {\n        System.out.println(greet("Alice"));\n    }\n}`
+                },
+                c: {
+                    'Hello World': `#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}`,
+                    'For Loop': `#include <stdio.h>\n\nint main() {\n    for (int i = 0; i < 5; i++) {\n        printf("Iteration %d\\n", i);\n    }\n    return 0;\n}`,
+                    'If-Else Statement': `#include <stdio.h>\n\nint main() {\n    int x = 10;\n\n    if (x > 5) {\n        printf("x is greater than 5\\n");\n    } else {\n        printf("x is not greater than 5\\n");\n    }\n    return 0;\n}`,
+                    'Function Definition': `#include <stdio.h>\n\nvoid greet(char* name) {\n    printf("Hello, %s!\\n", name);\n}\n\nint main() {\n    greet("Alice");\n    return 0;\n}`
+                },
+                cpp: {
+                    'Hello World': `#include <iostream>\n\nusing namespace std;\n\nint main() {\n    cout << "Hello, World!" << endl;\n    return 0;\n}`,
+                    'For Loop': `#include <iostream>\n\nusing namespace std;\n\nint main() {\n    for (int i = 0; i < 5; ++i) {\n        cout << "Iteration " << i << endl;\n    }\n    return 0;\n}`,
+                    'If-Else Statement': `#include <iostream>\n\nusing namespace std;\n\nint main() {\n    int x = 10;\n\n    if (x > 5) {\n        cout << "x is greater than 5" << endl;\n    } else {\n        cout << "x is not greater than 5" << endl;\n    }\n    return 0;\n}`,
+                    'Function Definition': `#include <iostream>\n#include <string>\n\nusing namespace std;\n\nvoid greet(const string& name) {\n    cout << "Hello, " << name << "!" << endl;\n}\n\nint main() {\n    greet("Alice");\n    return 0;\n}`
+                },
+                mysql: {
+                    'SELECT Statement': `SELECT column1, column2\nFROM table_name\nWHERE condition;`,
+                    'INSERT Statement': `INSERT INTO table_name (column1, column2, column3)\nVALUES (value1, value2, value3);`,
+                    'UPDATE Statement': `UPDATE table_name\nSET column1 = value1, column2 = value2\nWHERE condition;`,
+                    'DELETE Statement': `DELETE FROM table_name WHERE condition;`,
+                    'CREATE TABLE': `CREATE TABLE table_name (\n    id INT AUTO_INCREMENT PRIMARY KEY,\n    column1 VARCHAR(255) NOT NULL,\n    column2 INT,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);`
+                }
+            };
+
+            // --- Functions ---
+
+            function populateSnippetOptions() {
+                const selectedLanguage = languageSelect.value;
+                const availableSnippets = Object.keys(snippets[selectedLanguage]);
+                
+                snippetSelect.innerHTML = '';
+
+                availableSnippets.forEach(snippetName => {
+                    const option = document.createElement('option');
+                    option.value = snippetName;
+                    option.textContent = snippetName;
+                    snippetSelect.appendChild(option);
+                });
+                
+                // Add the custom AI option
+                const customOption = document.createElement('option');
+                customOption.value = 'custom';
+                customOption.textContent = 'Custom (AI)...';
+                snippetSelect.appendChild(customOption);
+            }
+
+            function updateCodeDisplay() {
+                const language = languageSelect.value;
+                const snippetName = snippetSelect.value;
+
+                if (snippetName === 'custom') {
+                    aiSection.classList.remove('hidden');
+                    codeOutput.textContent = `// Describe the code you want above and click "Generate with AI"`;
+                } else {
+                    aiSection.classList.add('hidden');
+                    const code = snippets[language][snippetName];
+                    codeOutput.textContent = code;
+                }
+                
+                // Update the class for syntax highlighting
+                codeOutput.className = `language-${language === 'cpp' ? 'cpp' : language}`;
+                hljs.highlightElement(codeOutput);
+            }
+
+            function copyToClipboard() {
+                const codeToCopy = codeOutput.textContent;
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = codeToCopy;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempTextArea);
+
+                copyText.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyText.textContent = 'Copy';
+                }, 2000);
+            }
+            
+            async function generateWithAI() {
+                const language = languageSelect.value;
+                const userPrompt = customPromptInput.value;
+
+                if (!userPrompt) {
+                    // Using a custom modal/alert in the future would be better
+                    alert('Please describe the code you want to generate.');
+                    return;
+                }
+
+                loaderContainer.classList.remove('hidden');
+                generateBtn.disabled = true;
+
+                // --- Balanced AI Prompt ---
+                const fullPrompt = `You are a helpful coding assistant. Generate a clean and runnable code snippet for the following task in ${language}.
+                - Your primary goal is to generate simple, clear code that is easy for a beginner to understand.
+                - If the user's request implies a more advanced concept, you can provide a more advanced solution, but always prioritize clarity.
+                - For C++, ensure you include necessary headers and 'using namespace std;' to keep the code clean for beginners.
+                - For all languages, provide a complete, runnable example where appropriate.
+                - IMPORTANT: Provide only the raw code itself, without any explanation, comments about the code, or markdown formatting.
+
+                Task: ${userPrompt}`;
+
+                try {
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: fullPrompt }] });
+                    const payload = { contents: chatHistory };
+                    const apiKey = "AIzaSyBKOPFIs56D5XofL74T_Ur27JvR5sEspbI"; // API key is handled by the environment
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                    
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API request failed with status ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        
+                        let generatedCode = result.candidates[0].content.parts[0].text;
+                        
+                        // Clean up the response to remove markdown backticks if they exist
+                        generatedCode = generatedCode.replace(/```[\w\s]*\n/g, '').replace(/```/g, '').trim();
+
+                        codeOutput.textContent = generatedCode;
+                        hljs.highlightElement(codeOutput);
+
+                    } else {
+                        throw new Error("Invalid response structure from AI.");
+                    }
+
+                } catch (error) {
+                    console.error('Error generating code with AI:', error);
+                    codeOutput.textContent = `// Error: Could not generate code. Please check the console for details.`;
+                    hljs.highlightElement(codeOutput);
+                } finally {
+                    loaderContainer.classList.add('hidden');
+                    generateBtn.disabled = false;
+                }
+            }
+
+            // --- Event Listeners ---
+            languageSelect.addEventListener('change', () => {
+                populateSnippetOptions();
+                updateCodeDisplay();
+            });
+
+            snippetSelect.addEventListener('change', updateCodeDisplay);
+            copyBtn.addEventListener('click', copyToClipboard);
+            generateBtn.addEventListener('click', generateWithAI);
+
+            // --- Initial Setup ---
+            populateSnippetOptions();
+            updateCodeDisplay();
+        });
+    </script>
+</body>
+</html>
